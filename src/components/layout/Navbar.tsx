@@ -77,7 +77,7 @@ export const Navbar: React.FC = () => {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <header className="w-full h-16 sticky top-0 bg-[var(--navbar-bg)] border-b border-[var(--card-border)] backdrop-blur-xl z-10 px-4 md:px-6 flex items-center justify-between">
+    <header className="hidden lg:flex w-full h-16 sticky top-0 bg-[var(--navbar-bg)] border-b border-[var(--card-border)] backdrop-blur-xl z-10 px-4 md:px-6 items-center justify-between">
       
       {/* Global Search Bar */}
       <div ref={searchRef} className="relative w-64 md:w-80">

@@ -144,12 +144,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ onToggleAssistant }) => {
           </div>
           <span className="font-bold text-base tracking-wide bg-gradient-to-r from-brand-primary to-brand-secondary bg-clip-text text-transparent">EduSys</span>
         </div>
-        <button
-          onClick={() => setIsOpenMobile(true)}
-          className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300"
-        >
-          <Menu className="w-6 h-6" />
-        </button>
+        <div className="flex items-center gap-2">
+          {currentUser && (
+            <img
+              src={currentUser.photo || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150'}
+              alt={currentUser.fullName}
+              className="w-8 h-8 rounded-lg object-cover ring-2 ring-brand-primary/30"
+            />
+          )}
+          <button
+            onClick={() => setIsOpenMobile(true)}
+            className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+        </div>
       </div>
 
       {/* Mobile Sidebar Overlay Drawer */}
