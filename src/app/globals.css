@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: #f8fafc;
+    --foreground: #0f172a;
+    --card-bg: rgba(255, 255, 255, 0.7);
+    --card-border: rgba(255, 255, 255, 0.4);
+    --card-shadow: rgba(79, 70, 229, 0.06);
+    --glass-blur: 16px;
+    
+    --primary: 79 70 229;     /* #4F46E5 */
+    --secondary: 124 58 237;  /* #7C3AED */
+    --accent: 139 92 246;
+    
+    --sidebar-bg: rgba(255, 255, 255, 0.8);
+    --navbar-bg: rgba(255, 255, 255, 0.75);
+  }
+
+  .dark {
+    --background: #090d16;
+    --foreground: #f1f5f9;
+    --card-bg: rgba(15, 23, 42, 0.6);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --card-shadow: rgba(0, 0, 0, 0.4);
+    
+    --primary: 99 102 241;    /* Lighter Indigo for Dark Mode */
+    --secondary: 139 92 246;  /* Lighter Purple for Dark Mode */
+    
+    --sidebar-bg: rgba(15, 23, 42, 0.7);
+    --navbar-bg: rgba(15, 23, 42, 0.6);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    overflow-x: hidden;
+  }
+}
+
+@theme {
+  --font-sans: var(--font-poppins), system-ui, sans-serif;
+  --radius-card: 18px;
+  
+  --color-brand-primary: rgb(var(--primary));
+  --color-brand-secondary: rgb(var(--secondary));
+  --color-brand-accent: rgb(var(--accent));
+}
+
+/* Glassmorphism Styles */
+.glass-panel {
+  background: var(--card-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--card-border);
+  box-shadow: 0 10px 30px -10px var(--card-shadow);
+}
+
+.glass-panel-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-panel-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 35px -10px var(--card-shadow);
+  border-color: rgba(var(--primary), 0.35);
+}
+
+/* Scrollbar Customization */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--primary), 0.2);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--primary), 0.4);
+}
+
+/* Custom Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.bg-grid-pattern {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(var(--primary), 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(var(--primary), 0.03) 1px, transparent 1px);
+}
