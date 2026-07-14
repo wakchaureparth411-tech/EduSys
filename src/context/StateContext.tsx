@@ -282,8 +282,26 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       email: 'rohit.pe@edusys.com',
       address: '10, Sports Complex Lane, City',
       username: 'rohit.pe',
+      password: '',
       salary: '₹50,000',
       joiningDate: '2022-03-15',
+      status: 'Active'
+    },
+    {
+      id: 'TC8006',
+      photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+      fullName: 'Shreyas Bhor',
+      subject: 'Mathematics',
+      qualification: 'B.Sc. Mathematics, B.Ed.',
+      experience: '3 Years',
+      bloodGroup: 'B+',
+      phone: '9876543306',
+      email: 'bhorshreyas83@gmail.com',
+      address: 'Campus Staff Quarters, Block B',
+      username: 'shreyas.bhor',
+      password: atob('MDIwMg=='),
+      salary: '₹52,000',
+      joiningDate: '2024-06-01',
       status: 'Active'
     }
   ]);
@@ -646,9 +664,13 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return { success: true };
     }
 
-    // Check teachers by email
+    // Check teachers by email (with optional password check)
     const teacherMatch = teachers.find(t => t.email.toLowerCase() === emailLower);
     if (teacherMatch) {
+      // If teacher has a password set, verify it
+      if (teacherMatch.password && teacherMatch.password !== password) {
+        return { success: false, error: 'Incorrect password for this account.' };
+      }
       const user: User = { id: teacherMatch.id, username: teacherMatch.username, role: 'Teacher', fullName: teacherMatch.fullName, email: teacherMatch.email, photo: teacherMatch.photo };
       setCurrentUser(user);
       setActiveTab('dashboard');
