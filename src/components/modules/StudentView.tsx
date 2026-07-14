@@ -44,7 +44,7 @@ export const StudentView: React.FC = () => {
     address: '',
     email: '',
     username: '',
-    password: 'password123',
+    password: '',
     admissionDate: '2026-06-01',
     status: 'Active'
   });
@@ -116,7 +116,7 @@ export const StudentView: React.FC = () => {
       address: '',
       email: '',
       username: '',
-      password: 'password123',
+      password: '',
       admissionDate: '2026-06-01',
       status: 'Active'
     });

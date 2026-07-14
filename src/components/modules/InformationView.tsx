@@ -273,7 +273,7 @@ export const InformationView: React.FC = () => {
                         <span className="text-[10px] text-zinc-400 block font-bold">Portal Password</span>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="font-mono text-zinc-800 dark:text-zinc-200 font-bold">
-                            {showPassword ? (selectedPerson.password || 'password123') : '••••••••'}
+                            {showPassword ? (selectedPerson.password || '(not set)') : '••••••••'}
                           </span>
                           <button
                             onClick={() => setShowPassword(!showPassword)}
@@ -349,7 +349,7 @@ export const InformationView: React.FC = () => {
                       <label className="text-[11px] font-semibold text-zinc-500">Portal Password</label>
                       <input
                         type="text"
-                        value={editForm.password || 'password123'}
+                        value={editForm.password || ''}
                         onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
                         className="w-full px-3 py-2 text-xs rounded-lg bg-black/5 dark:bg-white/5 border border-[var(--card-border)] text-zinc-800 dark:text-zinc-200 focus:outline-none font-mono"
                       />

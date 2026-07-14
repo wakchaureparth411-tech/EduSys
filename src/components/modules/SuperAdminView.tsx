@@ -34,7 +34,7 @@ export const SuperAdminView: React.FC = () => {
     email: '',
     phone: '',
     role: 'Admin' as UserRole,
-    password: 'password123'
+    password: ''
   });
 
   // Simulated Database Actions
@@ -121,7 +121,7 @@ export const SuperAdminView: React.FC = () => {
 
     logActivity('Create Admin User', `Super Admin registered new system executive: ${userForm.fullName}`);
     setShowAddUserModal(false);
-    setUserForm({ fullName: '', username: '', email: '', phone: '', role: 'Admin', password: 'password123' });
+    setUserForm({ fullName: '', username: '', email: '', phone: '', role: 'Admin', password: '' });
   };
 
   const handleDeleteUser = (id: string, name: string) => {
@@ -406,9 +406,10 @@ export const SuperAdminView: React.FC = () => {
                 <div className="space-y-1">
                   <label className="text-[11px] font-semibold text-zinc-500">Temporary Password</label>
                   <input
-                    type="text"
+                    type="password"
                     value={userForm.password}
                     onChange={(e) => setUserForm({ ...userForm, password: e.target.value })}
+                    placeholder="Set a secure password"
                     className="w-full px-3 py-2 text-xs rounded-lg bg-black/5 dark:bg-white/5 border border-[var(--card-border)] focus:outline-none text-zinc-800 dark:text-zinc-200 font-mono"
                   />
                 </div>

@@ -8,7 +8,7 @@ import { DesignAssistant } from '@/components/design-assistant/DesignAssistant';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Module Views
-import { LoginView } from '@/components/modules/LoginView';
+import { AuthView } from '@/components/modules/AuthView';
 import { DashboardView } from '@/components/modules/DashboardView';
 import { StudentView } from '@/components/modules/StudentView';
 import { TeacherView } from '@/components/modules/TeacherView';
@@ -52,9 +52,9 @@ export default function Home() {
     }
   };
 
-  // If not logged in, force Login screen
+  // If not logged in, show the new Sign Up / Sign In screen
   if (!currentUser) {
-    return <LoginView />;
+    return <AuthView />
   }
 
   return (

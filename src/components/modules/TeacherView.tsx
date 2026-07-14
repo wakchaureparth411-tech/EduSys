@@ -39,7 +39,7 @@ export const TeacherView: React.FC = () => {
     email: '',
     address: '',
     username: '',
-    password: 'password123',
+    password: '',
     salary: '₹60,000',
     joiningDate: '2026-06-01',
     status: 'Active'
@@ -91,7 +91,7 @@ export const TeacherView: React.FC = () => {
       email: '',
       address: '',
       username: '',
-      password: 'password123',
+      password: '',
       salary: '₹60,000',
       joiningDate: '2026-06-01',
       status: 'Active'

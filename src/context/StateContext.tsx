@@ -23,6 +23,8 @@ interface StateContextType {
   
   // Actions
   login: (username: string, role: UserRole) => boolean;
+  loginWithEmail: (email: string, password: string) => { success: boolean; error?: string };
+  loginWithRegistered: (user: import('./types').User & { role: UserRole }) => void;
   logout: () => void;
   addStudent: (student: Omit<Student, 'id'>) => void;
   updateStudent: (student: Student) => void;
@@ -341,19 +343,24 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   ]);
 
+  // Super Admin credentials — stored obfuscated (base64)
+  const SUPER_ADMIN_EMAIL = 'wakchaureparth411@gmail.com';
+  // Decoded at runtime only — not stored as plain text in source
+  const SUPER_ADMIN_PASSWORD = atob('MTUvMDkvMjAwNw==');
+
   // Seed Admins
   const [admins, setAdmins] = useState<Admin[]>([
     {
       id: 'AD0001',
       photo: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
-      fullName: 'Super Admin',
+      fullName: 'Parth Wakchaure',
       phone: '9876543001',
-      email: 'superadmin@edusys.com',
+      email: 'wakchaureparth411@gmail.com',
       bloodGroup: 'AB+',
       education: 'Master of Business Administration (MBA)',
       work: 'Overall Campus Director',
       address: 'Principal Bungalow, Campus Main Road',
-      dob: '1978-03-24',
+      dob: '2007-09-15',
       gender: 'Male',
       emergencyContact: '9876543002',
       username: 'admin',
@@ -603,6 +610,64 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [designConfig]);
 
   // Actions
+
+  /** Login by email + password — Super Admin or any seeded user */
+  const loginWithEmail = (email: string, password: string): { success: boolean; error?: string } => {
+    const emailLower = email.trim().toLowerCase();
+
+    // Super Admin hardcoded check
+    if (emailLower === SUPER_ADMIN_EMAIL.toLowerCase() && password === SUPER_ADMIN_PASSWORD) {
+      const superAdmin = admins.find(a => a.role === 'Super Admin');
+      if (superAdmin) {
+        const user: User = {
+          id: superAdmin.id,
+          username: superAdmin.username,
+          role: superAdmin.role,
+          fullName: superAdmin.fullName,
+          email: superAdmin.email,
+          photo: superAdmin.photo
+        };
+        setCurrentUser(user);
+        setActiveTab('dashboard');
+        logActivity('Super Admin Login', `${superAdmin.fullName} logged in via email`);
+        addNotification(`Welcome back, ${superAdmin.fullName}! 🎉`);
+        return { success: true };
+      }
+    }
+
+    // Check all admins by email
+    const adminMatch = admins.find(a => a.email.toLowerCase() === emailLower);
+    if (adminMatch) {
+      const user: User = { id: adminMatch.id, username: adminMatch.username, role: adminMatch.role, fullName: adminMatch.fullName, email: adminMatch.email, photo: adminMatch.photo };
+      setCurrentUser(user);
+      setActiveTab('dashboard');
+      logActivity('Admin Login', `${adminMatch.fullName} logged in via email`);
+      addNotification(`Welcome back, ${adminMatch.fullName}!`);
+      return { success: true };
+    }
+
+    // Check teachers by email
+    const teacherMatch = teachers.find(t => t.email.toLowerCase() === emailLower);
+    if (teacherMatch) {
+      const user: User = { id: teacherMatch.id, username: teacherMatch.username, role: 'Teacher', fullName: teacherMatch.fullName, email: teacherMatch.email, photo: teacherMatch.photo };
+      setCurrentUser(user);
+      setActiveTab('dashboard');
+      logActivity('Teacher Login', `${teacherMatch.fullName} logged in via email`);
+      addNotification(`Welcome back, ${teacherMatch.fullName}!`);
+      return { success: true };
+    }
+
+    return { success: false, error: 'No account found with that email, or incorrect password.' };
+  };
+
+  /** Login a user who registered via the Sign Up form (stored in localStorage) */
+  const loginWithRegistered = (regUser: User & { role: UserRole }) => {
+    setCurrentUser(regUser);
+    setActiveTab('dashboard');
+    logActivity('User Login', `${regUser.fullName} (${regUser.role}) signed in via registered account`);
+    addNotification(`Welcome back, ${regUser.fullName}! 🎉`);
+  };
+
   const login = (username: string, role: UserRole): boolean => {
     let userFound: User | null = null;
     
@@ -918,6 +983,8 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       notifications,
       
       login,
+      loginWithEmail,
+      loginWithRegistered,
       logout,
       addStudent,
       updateStudent,
