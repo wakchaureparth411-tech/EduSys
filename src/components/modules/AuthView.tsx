@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GraduationCap, Mail, Lock, User, Eye, EyeOff, Sun, Moon, UserCheck, CheckCircle2, ArrowRight, Sparkles } from 'lucide-react';
 import { useAppState } from '@/context/StateContext';
 import { UserRole } from '@/context/types';
-import { registerUser, loginUser } from '@/lib/authDB';
+import { firebaseRegister, firebaseSignIn, getUserProfile } from '@/lib/firebaseAuth';
 
 type AuthMode = 'signin' | 'signup';
 
@@ -44,19 +44,38 @@ export const AuthView: React.FC = () => {
     setError('');
     setIsLoading(true);
 
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 400));
 
-    // 1. Try email+password login via context (covers Super Admin & seeded users)
+    // 1. Try Super Admin / seeded teacher via context
     const ctxResult = loginWithEmail(signInForm.usernameOrEmail, signInForm.password);
     if (ctxResult.success) {
       setIsLoading(false);
       return;
     }
 
-    // 2. Try localStorage registered users
-    const result = loginUser(signInForm.usernameOrEmail, signInForm.password);
+    // 2. Try Firebase Auth (registered cloud users)
+    const result = await firebaseSignIn(signInForm.usernameOrEmail, signInForm.password);
     if (result.success && result.user) {
-      loginWithRegistered(result.user);
+      const profile = await getUserProfile(result.user.uid);
+      if (profile) {
+        loginWithRegistered({
+          id: result.user.uid,
+          username: profile.username as string || result.user.email || '',
+          role: profile.role as UserRole || 'Student',
+          fullName: profile.fullName as string || result.user.displayName || '',
+          email: profile.email as string || result.user.email || '',
+          photo: profile.photo as string || result.user.photoURL || ''
+        });
+      } else {
+        loginWithRegistered({
+          id: result.user.uid,
+          username: result.user.email || '',
+          role: 'Student',
+          fullName: result.user.displayName || result.user.email || '',
+          email: result.user.email || '',
+          photo: ''
+        });
+      }
     } else {
       setError(result.error || ctxResult.error || 'Invalid credentials. Please try again.');
     }
@@ -70,7 +89,7 @@ export const AuthView: React.FC = () => {
     setSuccess('');
     setIsLoading(true);
 
-    await new Promise(r => setTimeout(r, 700));
+    await new Promise(r => setTimeout(r, 500));
 
     if (signUpForm.password !== signUpForm.confirmPassword) {
       setError('Passwords do not match.');
@@ -78,16 +97,23 @@ export const AuthView: React.FC = () => {
       return;
     }
 
-    const result = registerUser(
-      signUpForm.fullName,
-      signUpForm.email,
-      signUpForm.username,
-      signUpForm.password,
-      signUpForm.role
-    );
+    if (signUpForm.password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      setIsLoading(false);
+      return;
+    }
+
+    // Register via Firebase Auth + Firestore
+    const result = await firebaseRegister({
+      fullName: signUpForm.fullName,
+      email: signUpForm.email,
+      username: signUpForm.username,
+      password: signUpForm.password,
+      role: signUpForm.role
+    });
 
     if (result.success) {
-      setSuccess('Account created successfully! You can now sign in.');
+      setSuccess('Account created! You can now sign in. ✅');
       setSignUpForm({ fullName: '', email: '', username: '', password: '', confirmPassword: '', role: 'Student' });
       setTimeout(() => {
         setMode('signin');

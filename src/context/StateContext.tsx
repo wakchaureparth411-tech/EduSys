@@ -5,6 +5,7 @@ import {
   Student, Teacher, Guard, Admin, GetPass, AttendanceRecord, 
   ActivityLog, SchoolSettings, DesignConfig, User, UserRole, AttendanceStatus
 } from './types';
+import { fsListen, fsSet, fsUpdate, fsDelete, fsAdd } from '@/lib/firebaseDB';
 
 interface StateContextType {
   currentUser: User | null;
@@ -627,6 +628,32 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     root.style.setProperty('--font-poppins', designConfig.fontFamily);
   }, [designConfig]);
 
+  // ─── Firestore real-time sync ────────────────────────────────────────
+  useEffect(() => {
+    // Listen to students collection
+    const unsubStudents = fsListen('students', (data) => {
+      if (data.length > 0) setStudents(data as unknown as Student[]);
+    });
+    // Listen to teachers collection
+    const unsubTeachers = fsListen('teachers', (data) => {
+      if (data.length > 0) setTeachers(data as unknown as Teacher[]);
+    });
+    // Listen to guards collection
+    const unsubGuards = fsListen('guards', (data) => {
+      if (data.length > 0) setGuards(data as unknown as Guard[]);
+    });
+    // Listen to getpass collection
+    const unsubGetPass = fsListen('getpass', (data) => {
+      if (data.length > 0) setGetPassRequests(data as unknown as GetPass[]);
+    });
+    return () => {
+      unsubStudents();
+      unsubTeachers();
+      unsubGuards();
+      unsubGetPass();
+    };
+  }, []);
+
   // Actions
 
   /** Login by email + password — Super Admin or any seeded user */
@@ -761,69 +788,69 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Student CRUD
   const addStudent = (studentData: Omit<Student, 'id'>) => {
-    const newId = `ST${students.length + 1001}`;
-    const newStudent: Student = {
-      ...studentData,
-      id: newId
-    };
+    const newId = `ST${Date.now()}`;
+    const newStudent: Student = { ...studentData, id: newId };
     setStudents(prev => [...prev, newStudent]);
+    fsSet('students', newId, newStudent as unknown as Record<string, unknown>);
     logActivity('Add Student', `Created student profile: ${newStudent.fullName} (${newId})`);
     addNotification(`New student ${newStudent.fullName} has been registered`);
   };
 
   const updateStudent = (updatedStudent: Student) => {
     setStudents(prev => prev.map(s => s.id === updatedStudent.id ? updatedStudent : s));
+    fsUpdate('students', updatedStudent.id, updatedStudent as unknown as Record<string, unknown>);
     logActivity('Update Student', `Updated student profile: ${updatedStudent.fullName} (${updatedStudent.id})`);
   };
 
   const deleteStudent = (id: string) => {
     const student = students.find(s => s.id === id);
     setStudents(prev => prev.filter(s => s.id !== id));
+    fsDelete('students', id);
     logActivity('Delete Student', `Deleted student profile: ${student?.fullName || id}`);
     addNotification(`Student ${student?.fullName || id} registration removed`);
   };
 
   // Teacher CRUD
   const addTeacher = (teacherData: Omit<Teacher, 'id'>) => {
-    const newId = `TC${teachers.length + 8001}`;
-    const newTeacher: Teacher = {
-      ...teacherData,
-      id: newId
-    };
+    const newId = `TC${Date.now()}`;
+    const newTeacher: Teacher = { ...teacherData, id: newId };
     setTeachers(prev => [...prev, newTeacher]);
+    fsSet('teachers', newId, newTeacher as unknown as Record<string, unknown>);
     logActivity('Add Teacher', `Created teacher profile: ${newTeacher.fullName} (${newId})`);
     addNotification(`New teacher ${newTeacher.fullName} joined the school`);
   };
 
   const updateTeacher = (updatedTeacher: Teacher) => {
     setTeachers(prev => prev.map(t => t.id === updatedTeacher.id ? updatedTeacher : t));
+    fsUpdate('teachers', updatedTeacher.id, updatedTeacher as unknown as Record<string, unknown>);
     logActivity('Update Teacher', `Updated teacher profile: ${updatedTeacher.fullName} (${updatedTeacher.id})`);
   };
 
   const deleteTeacher = (id: string) => {
     const teacher = teachers.find(t => t.id === id);
     setTeachers(prev => prev.filter(t => t.id !== id));
+    fsDelete('teachers', id);
     logActivity('Delete Teacher', `Deleted teacher profile: ${teacher?.fullName || id}`);
   };
 
   // Guards CRUD
   const addGuard = (guardData: Omit<Guard, 'id'>) => {
-    const newId = `GD${guards.length + 9001}`;
-    const newGuard: Guard = {
-      ...guardData,
-      id: newId
-    };
+    const newId = `GD${Date.now()}`;
+    const newGuard: Guard = { ...guardData, id: newId };
     setGuards(prev => [...prev, newGuard]);
+    fsSet('guards', newId, newGuard as unknown as Record<string, unknown>);
     logActivity('Add Guard', `Created security guard profile: ${newGuard.fullName}`);
   };
 
   const updateGuard = (updatedGuard: Guard) => {
     setGuards(prev => prev.map(g => g.id === updatedGuard.id ? updatedGuard : g));
+    fsUpdate('guards', updatedGuard.id, updatedGuard as unknown as Record<string, unknown>);
     logActivity('Update Guard', `Updated guard profile: ${updatedGuard.fullName}`);
   };
 
   const deleteGuard = (id: string) => {
     setGuards(prev => prev.filter(g => g.id !== id));
+    fsDelete('guards', id);
     logActivity('Delete Guard', `Deleted guard ID: ${id}`);
   };
 
@@ -850,19 +877,16 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Get Pass Actions
   const createGetPass = (passData: Omit<GetPass, 'id' | 'status' | 'approvals' | 'qrCode'>) => {
-    const newId = `GP${getPassRequests.length + 801}`;
+    const newId = `GP${Date.now()}`;
     const newPass: GetPass = {
       ...passData,
       id: newId,
       status: 'Pending',
-      approvals: {
-        teacher: 'Pending',
-        admin: 'Pending',
-        security: 'Pending'
-      },
+      approvals: { teacher: 'Pending', admin: 'Pending', security: 'Pending' },
       qrCode: `${newId}-${passData.studentName.replace(/\s+/g, '-').toUpperCase()}`
     };
     setGetPassRequests(prev => [newPass, ...prev]);
+    fsSet('getpass', newId, newPass as unknown as Record<string, unknown>);
     logActivity('Create Get Pass', `Student ${passData.studentName} generated exit request: ${newId}`);
     addNotification(`New Get Pass request from ${passData.studentName}`);
   };
