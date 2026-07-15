@@ -12,8 +12,6 @@ export const AuthView: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  // Sign In form
   const [signInForm, setSignInForm] = useState({ usernameOrEmail: '', password: '' });
 
   const toggleTheme = () => {
@@ -31,25 +29,25 @@ export const AuthView: React.FC = () => {
 
     await new Promise(r => setTimeout(r, 400));
 
-    // 1. Try Super Admin / seeded teacher via context
+    // 1. Try Super Admin / seeded users via context (email + password)
     const ctxResult = loginWithEmail(signInForm.usernameOrEmail, signInForm.password);
     if (ctxResult.success) {
       setIsLoading(false);
       return;
     }
 
-    // 2. Try Firebase Auth (registered cloud users)
+    // 2. Try Firebase Auth (cloud registered users)
     const result = await firebaseSignIn(signInForm.usernameOrEmail, signInForm.password);
     if (result.success && result.user) {
       const profile = await getUserProfile(result.user.uid);
       if (profile) {
         loginWithRegistered({
           id: result.user.uid,
-          username: profile.username as string || result.user.email || '',
-          role: profile.role as UserRole || 'Student',
-          fullName: profile.fullName as string || result.user.displayName || '',
-          email: profile.email as string || result.user.email || '',
-          photo: profile.photo as string || result.user.photoURL || ''
+          username: (profile.username as string) || result.user.email || '',
+          role: (profile.role as UserRole) || 'Student',
+          fullName: (profile.fullName as string) || result.user.displayName || '',
+          email: (profile.email as string) || result.user.email || '',
+          photo: (profile.photo as string) || result.user.photoURL || ''
         });
       } else {
         loginWithRegistered({
@@ -62,17 +60,15 @@ export const AuthView: React.FC = () => {
         });
       }
     } else {
-      setError(result.error || ctxResult.error || 'Invalid credentials. Please try again.');
+      setError(result.error || ctxResult.error || 'Invalid email or password. Please try again.');
     }
 
     setIsLoading(false);
   };
 
-
-
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center bg-[#f8fafc] dark:bg-[#090d16] p-4 overflow-hidden">
-      
+
       {/* Animated Background Orbs */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -83,17 +79,12 @@ export const AuthView: React.FC = () => {
         <motion.div
           animate={{ x: [0, -70, 0], y: [0, 60, 0], rotate: [360, 180, 0] }}
           transition={{ duration: 22, repeat: Infinity, ease: 'linear' }}
-          className="absolute -bottom-32 -right-32 w-[28rem] h-[28rem] rounded-full bg-purple-500/12 blur-3xl"
+          className="absolute -bottom-32 -right-32 w-[28rem] h-[28rem] rounded-full bg-purple-500/10 blur-3xl"
         />
         <motion.div
           animate={{ y: [-15, 15, -15] }}
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
           className="absolute top-1/3 right-1/4 w-48 h-48 rounded-2xl bg-violet-400/5 rotate-12 blur-2xl"
-        />
-        <motion.div
-          animate={{ x: [-20, 20, -20] }}
-          transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute bottom-1/3 left-1/5 w-36 h-36 rounded-2xl bg-blue-400/6 rotate-45 blur-2xl"
         />
       </div>
 
@@ -118,7 +109,9 @@ export const AuthView: React.FC = () => {
         <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg">
           <GraduationCap className="w-4 h-4 text-white" />
         </div>
-        <span className="text-sm font-bold text-zinc-800 dark:text-zinc-100 hidden sm:block">{settings.schoolName}</span>
+        <span className="text-sm font-bold text-zinc-800 dark:text-zinc-100 hidden sm:block">
+          {settings.schoolName}
+        </span>
       </motion.div>
 
       {/* Main Auth Card */}
@@ -126,17 +119,19 @@ export const AuthView: React.FC = () => {
         initial={{ opacity: 0, scale: 0.96, y: 24 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-[460px] z-10"
+        className="w-full max-w-[420px] z-10"
       >
         <div className="bg-white/80 dark:bg-[#0f172a]/80 backdrop-blur-2xl rounded-3xl border border-white/60 dark:border-white/10 shadow-2xl shadow-indigo-500/10 overflow-hidden">
-          
-          {/* Header Bar */}
+
+          {/* Header */}
           <div className="flex items-center justify-center py-4 border-b border-zinc-100 dark:border-white/10">
-            <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">Staff & Student Sign In</span>
+            <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
+              Staff &amp; Student Sign In
+            </span>
           </div>
 
-          <div className="p-7 md:p-8">
-            
+          <div className="p-7">
+
             {/* Logo & Title */}
             <div className="flex flex-col items-center text-center mb-7">
               <motion.div
@@ -147,7 +142,7 @@ export const AuthView: React.FC = () => {
               >
                 <UserCheck className="w-7 h-7 text-white" />
               </motion.div>
-              <h1 className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 Welcome Back!
               </h1>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1.5">
@@ -160,9 +155,9 @@ export const AuthView: React.FC = () => {
               {error && (
                 <motion.div
                   key="error"
-                  initial={{ opacity: 0, y: -8, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
                   className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-500 font-medium text-center"
                 >
                   {error}
@@ -171,68 +166,75 @@ export const AuthView: React.FC = () => {
             </AnimatePresence>
 
             {/* Sign In Form */}
-            <div>
-              <form
-                  onSubmit={handleSignIn}
-                  className="space-y-4"
-                >
-                  {/* Username / Email */}
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Username or Email</label>
-                    <div className="relative">
-                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-                      <input
-                        type="text"
-                        value={signInForm.usernameOrEmail}
-                        onChange={e => setSignInForm({ ...signInForm, usernameOrEmail: e.target.value })}
-                        placeholder="Enter your username or email"
-                        required
-                        className="w-full pl-10 pr-4 py-3 text-sm rounded-xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20 text-zinc-800 dark:text-zinc-200 transition-all placeholder:text-zinc-400 placeholder:text-xs"
-                      />
-                    </div>
-                  </div>
+            <form onSubmit={handleSignIn} className="space-y-4">
 
-                  {/* Password */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <label className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Password</label>
-                      <a href="#" className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">Forgot password?</a>
-                    </div>
-                    <div className="relative">
-                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        value={signInForm.password}
-                        onChange={e => setSignInForm({ ...signInForm, password: e.target.value })}
-                        placeholder="Enter your password"
-                        required
-                        className="w-full pl-10 pr-12 py-3 text-sm rounded-xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20 text-zinc-800 dark:text-zinc-200 transition-all placeholder:text-zinc-400 placeholder:text-xs"
-                      />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors">
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
+              {/* Email / Username */}
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                  Username or Email
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                  <input
+                    type="text"
+                    value={signInForm.usernameOrEmail}
+                    onChange={e => setSignInForm({ ...signInForm, usernameOrEmail: e.target.value })}
+                    placeholder="Enter your email or username"
+                    required
+                    autoComplete="email"
+                    className="w-full pl-10 pr-4 py-3 text-sm rounded-xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20 text-zinc-800 dark:text-zinc-200 transition-all placeholder:text-zinc-400 placeholder:text-xs"
+                  />
+                </div>
+              </div>
 
+              {/* Password */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                    Password
+                  </label>
+                </div>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={signInForm.password}
+                    onChange={e => setSignInForm({ ...signInForm, password: e.target.value })}
+                    placeholder="Enter your password"
+                    required
+                    autoComplete="current-password"
+                    className="w-full pl-10 pr-12 py-3 text-sm rounded-xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20 text-zinc-800 dark:text-zinc-200 transition-all placeholder:text-zinc-400 placeholder:text-xs"
+                  />
                   <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/35 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors"
                   >
-                    {isLoading ? (
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    ) : (
-                      <>Sign In <ArrowRight className="w-4 h-4" /></>
-                    )}
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
+                </div>
+              </div>
 
-                  <p className="text-center text-xs text-zinc-500 dark:text-zinc-400 pt-1">
-                    Contact your Super Admin to get access.
-                  </p>
-                </form>
-            </div>
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/35 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
+              >
+                {isLoading ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>Sign In to Account <ArrowRight className="w-4 h-4" /></>
+                )}
+              </button>
 
+              {/* Info */}
+              <p className="text-center text-xs text-zinc-400 dark:text-zinc-500 pt-1">
+                Don&apos;t have access? Contact your{' '}
+                <span className="text-indigo-600 dark:text-indigo-400 font-semibold">Super Admin</span>
+              </p>
+
+            </form>
           </div>
         </div>
 
