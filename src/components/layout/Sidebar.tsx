@@ -16,15 +16,15 @@ interface SidebarProps {
 
 // ─── Shared menu items definition ──────────────────────────────────────────
 const ALL_MENU_ITEMS = [
-  { id: 'dashboard',   label: 'Dashboard',   icon: LayoutDashboard, roles: ['Super Admin','Admin','Teacher','Student','Security'] },
-  { id: 'students',    label: 'Students',    icon: Users,           roles: ['Super Admin','Admin','Teacher'] },
-  { id: 'teachers',    label: 'Teachers',    icon: UserCheck,       roles: ['Super Admin','Admin'] },
-  { id: 'attendance',  label: 'Attendance',  icon: CalendarCheck,   roles: ['Super Admin','Admin','Teacher','Student'] },
-  { id: 'getpass',     label: 'Get Pass',    icon: FileCheck,       roles: ['Super Admin','Admin','Teacher','Student','Security'] },
+  { id: 'dashboard',   label: 'Dashboard',   icon: LayoutDashboard, roles: ['Super Admin','Admin','Manager','Teacher','Student','Security'] },
+  { id: 'students',    label: 'Students',    icon: Users,           roles: ['Super Admin','Admin','Manager','Teacher'] },
+  { id: 'teachers',    label: 'Teachers',    icon: UserCheck,       roles: ['Super Admin','Admin','Manager'] },
+  { id: 'attendance',  label: 'Attendance',  icon: CalendarCheck,   roles: ['Super Admin','Admin','Manager','Teacher','Student'] },
+  { id: 'getpass',     label: 'Get Pass',    icon: FileCheck,       roles: ['Super Admin','Admin','Manager','Teacher','Student','Security'] },
   { id: 'security',    label: 'Security',    icon: ShieldCheck,     roles: ['Super Admin','Admin','Security'] },
-  { id: 'information', label: 'Information', icon: Info,            roles: ['Super Admin','Admin','Teacher','Student','Security'] },
+  { id: 'information', label: 'Information', icon: Info,            roles: ['Super Admin','Admin','Manager','Teacher','Student','Security'] },
   { id: 'superadmin',  label: 'Super Admin', icon: ShieldAlert,     roles: ['Super Admin'] },
-  { id: 'reports',     label: 'Reports',     icon: BarChart3,       roles: ['Super Admin','Admin','Teacher'] },
+  { id: 'reports',     label: 'Reports',     icon: BarChart3,       roles: ['Super Admin','Admin','Manager','Teacher'] },
   { id: 'settings',    label: 'Settings',    icon: Settings,        roles: ['Super Admin','Admin'] },
 ];
 

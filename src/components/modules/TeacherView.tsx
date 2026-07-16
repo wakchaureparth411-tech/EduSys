@@ -132,7 +132,7 @@ export const TeacherView: React.FC = () => {
               <p className="text-xs text-zinc-500 mt-0.5">Manage academic instructors and faculties</p>
             </div>
             
-            {(currentUser?.role === 'Super Admin' || currentUser?.role === 'Admin') && (
+            {(currentUser?.role === 'Super Admin' || currentUser?.role === 'Admin' || currentUser?.role === 'Manager') && (
               <button
                 onClick={() => setShowAddModal(true)}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-brand-primary to-brand-secondary text-white text-xs font-semibold hover:scale-[1.01] transition-all shadow-md shadow-brand-primary/10"
@@ -213,7 +213,7 @@ export const TeacherView: React.FC = () => {
                     <Eye className="w-3.5 h-3.5" /> Inspect
                   </button>
 
-                  {(currentUser?.role === 'Super Admin' || currentUser?.role === 'Admin') && (
+                  {(currentUser?.role === 'Super Admin' || currentUser?.role === 'Admin' || currentUser?.role === 'Manager') && (
                     <>
                       <button
                         onClick={() => openEditModal(teacher)}
@@ -275,7 +275,7 @@ export const TeacherView: React.FC = () => {
               </span>
               <p className="text-[10px] font-mono text-zinc-400 mt-2">ID: {selectedTeacher.id}</p>
 
-              {(currentUser?.role === 'Super Admin' || currentUser?.role === 'Admin') && (
+              {(currentUser?.role === 'Super Admin' || currentUser?.role === 'Admin' || currentUser?.role === 'Manager') && (
                 <button
                   onClick={() => openEditModal(selectedTeacher)}
                   className="w-full mt-6 py-2.5 bg-brand-secondary text-white text-xs font-bold rounded-xl shadow-lg shadow-brand-secondary/10 hover:shadow-brand-secondary/20 transition-all"

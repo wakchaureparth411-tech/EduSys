@@ -1,4 +1,4 @@
-export type UserRole = 'Super Admin' | 'Admin' | 'Teacher' | 'Student' | 'Security';
+export type UserRole = 'Super Admin' | 'Admin' | 'Manager' | 'Teacher' | 'Student' | 'Security';
 
 export interface User {
   id: string;
@@ -81,7 +81,7 @@ export interface Admin {
   emergencyContact: string;
   username: string;
   password?: string;
-  role: 'Super Admin' | 'Admin';
+  role: 'Super Admin' | 'Admin' | 'Manager';
   status: 'Active' | 'Inactive';
 }
 

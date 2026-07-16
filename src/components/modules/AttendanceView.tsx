@@ -231,6 +231,46 @@ export const AttendanceView: React.FC = () => {
                         <div>
                           <p className="font-bold text-xs text-zinc-800 dark:text-zinc-200">{student.fullName}</p>
                           <p className="text-[10px] text-zinc-400 font-mono">Roll: {student.rollNumber} | ID: {student.id}</p>
+                          
+                          {/* Past Attendance History */}
+                          {(() => {
+                            const studentHistory = attendanceRecords
+                              .filter(r => r.classVal === selectedClass && r.division === selectedDivision && r.date !== selectedDate)
+                              .sort((a, b) => b.date.localeCompare(a.date));
+                            
+                            if (studentHistory.length === 0) return null;
+
+                            return (
+                              <div className="flex flex-wrap items-center gap-1 mt-1">
+                                <span className="text-[9px] text-zinc-400 font-medium">History:</span>
+                                <div className="flex flex-wrap gap-1">
+                                  {studentHistory.slice(0, 5).map(h => {
+                                    const status = h.records[student.id];
+                                    if (!status) return null;
+                                    const colorMap = {
+                                      Present: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+                                      Absent: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
+                                      Late: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+                                      Leave: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
+                                    };
+                                    const labelMap = { Present: 'P', Absent: 'A', Late: 'L', Leave: 'Lv' };
+                                    const parts = h.date.split('-');
+                                    const dateShort = parts.length === 3 ? `${parts[2]}/${parts[1]}` : h.date;
+
+                                    return (
+                                      <span 
+                                        key={h.date} 
+                                        className={`text-[8px] font-bold px-1 py-0.5 rounded border ${colorMap[status]}`}
+                                        title={`${h.date}: ${status}`}
+                                      >
+                                        {dateShort}:{labelMap[status]}
+                                      </span>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            );
+                          })()}
                         </div>
                       </div>
 

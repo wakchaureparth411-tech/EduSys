@@ -402,6 +402,23 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       username: 'admin1',
       role: 'Admin',
       status: 'Active'
+    },
+    {
+      id: 'AD0003',
+      photo: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150',
+      fullName: 'Mayur Gambhire',
+      phone: '9000000000',
+      email: 'Mayur2505@gmail.com',
+      bloodGroup: 'B+',
+      education: 'MBA – Human Resource Management',
+      work: 'Manager – Student & Teacher Affairs',
+      address: 'Pune, Maharashtra',
+      dob: '1995-05-25',
+      gender: 'Male',
+      emergencyContact: '9000000001',
+      username: 'mayur.gambhire',
+      role: 'Manager',
+      status: 'Active'
     }
   ]);
 
@@ -680,21 +697,25 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     }
 
-    // Check all admins by email
+    // Check all admins/managers by email (with password verification)
+    const MANAGER_PASSWORD = 'Mayur@2505';
     const adminMatch = admins.find(a => a.email.toLowerCase() === emailLower);
     if (adminMatch) {
+      // Manager must verify password
+      if (adminMatch.role === 'Manager' && password !== MANAGER_PASSWORD) {
+        return { success: false, error: 'Incorrect password for this account.' };
+      }
       const user: User = { id: adminMatch.id, username: adminMatch.username, role: adminMatch.role, fullName: adminMatch.fullName, email: adminMatch.email, photo: adminMatch.photo };
       setCurrentUser(user);
       setActiveTab('dashboard');
-      logActivity('Admin Login', `${adminMatch.fullName} logged in via email`);
-      addNotification(`Welcome back, ${adminMatch.fullName}!`);
+      logActivity(`${adminMatch.role} Login`, `${adminMatch.fullName} logged in`);
+      addNotification(`Welcome back, ${adminMatch.fullName}! 👋`);
       return { success: true };
     }
 
     // Check teachers by email (with optional password check)
     const teacherMatch = teachers.find(t => t.email.toLowerCase() === emailLower);
     if (teacherMatch) {
-      // If teacher has a password set, verify it
       if (teacherMatch.password && teacherMatch.password !== password) {
         return { success: false, error: 'Incorrect password for this account.' };
       }
@@ -720,7 +741,7 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const login = (username: string, role: UserRole): boolean => {
     let userFound: User | null = null;
     
-    if (role === 'Super Admin' || role === 'Admin') {
+    if (role === 'Super Admin' || role === 'Admin' || role === 'Manager') {
       const match = admins.find(a => a.username.toLowerCase() === username.toLowerCase());
       if (match) {
         userFound = { id: match.id, username: match.username, role: match.role, fullName: match.fullName, email: match.email, photo: match.photo };

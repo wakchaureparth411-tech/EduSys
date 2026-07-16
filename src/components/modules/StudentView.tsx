@@ -174,7 +174,7 @@ export const StudentView: React.FC = () => {
                 <span>{isExporting === 'PDF' ? 'Exporting...' : 'Export PDF'}</span>
               </button>
 
-              {(currentUser?.role === 'Super Admin' || currentUser?.role === 'Admin') && (
+              {(currentUser?.role === 'Super Admin' || currentUser?.role === 'Admin' || currentUser?.role === 'Manager') && (
                 <button
                   onClick={() => setShowAddModal(true)}
                   className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-brand-primary to-brand-secondary text-white text-xs font-semibold hover:scale-[1.01] transition-all shadow-md shadow-brand-primary/10"
@@ -261,7 +261,7 @@ export const StudentView: React.FC = () => {
                             <Eye className="w-3.5 h-3.5" />
                           </button>
                           
-                          {(currentUser?.role === 'Super Admin' || currentUser?.role === 'Admin') && (
+                          {(currentUser?.role === 'Super Admin' || currentUser?.role === 'Admin' || currentUser?.role === 'Manager') && (
                             <>
                               <button
                                 onClick={() => openEditModal(student)}
