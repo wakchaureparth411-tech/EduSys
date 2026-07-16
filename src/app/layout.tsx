@@ -7,22 +7,21 @@ const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700", "800"],
   subsets: ["latin"],
   variable: "--font-poppins",
-  display: "swap"
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "EduSys - Smart Campus School & College Management System",
-  description: "Complete premium glassmorphic educational resource planner, gate exit permits and directory platform.",
+  title: "EduSys – Smart Campus Management",
+  description: "Premium school & college management: attendance, gate pass, fees, results and more.",
+  viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${poppins.variable} h-full antialiased`}>
-      <body className="h-full font-sans bg-[#f8fafc] dark:bg-[#090d16] text-[#0f172a] dark:text-[#f1f5f9] overflow-x-hidden">
+    <html lang="en" className={poppins.variable}>
+      <body>
         <StateProvider>
           {children}
         </StateProvider>

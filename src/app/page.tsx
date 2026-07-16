@@ -23,9 +23,8 @@ export default function Home() {
   const { currentUser, activeTab } = useAppState();
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
 
-  const renderActiveView = () => {
+  const renderView = () => {
     switch (activeTab) {
-      case 'dashboard':   return <DashboardView   key="dashboard"   />;
       case 'students':    return <StudentView      key="students"    />;
       case 'teachers':    return <TeacherView      key="teachers"    />;
       case 'attendance':  return <AttendanceView   key="attendance"  />;
@@ -39,38 +38,29 @@ export default function Home() {
     }
   };
 
-  if (!currentUser) return <AuthView />;
+  // Not logged in → show auth screen
+  if (!currentUser) {
+    return <AuthView />;
+  }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        width: '100%',
-        minHeight: '100vh',
-        backgroundColor: 'var(--background, #f8fafc)',
-      }}
-    >
-      {/* Desktop sidebar — CSS hides it on mobile */}
+    // .app-shell  = display:flex; flex-direction:row; min-height:100vh
+    <div className="app-shell">
+
+      {/* Desktop sidebar — hidden on mobile via Tailwind hidden lg:flex */}
       <Sidebar onToggleAssistant={() => setIsAssistantOpen(true)} />
 
-      {/* Right column — takes all remaining width */}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          flex: 1,
-          minWidth: 0,
-          minHeight: '100vh',
-        }}
-      >
-        {/* Mobile top bar (only visible on mobile, flex-shrink:0) */}
+      {/* .app-content = display:flex; flex-direction:column; flex:1 */}
+      <div className="app-content">
+
+        {/* Mobile top bar — visible only on mobile (lg:hidden inside component) */}
         <MobileTopBar onToggleAssistant={() => setIsAssistantOpen(true)} />
 
-        {/* Desktop top Navbar (hidden on mobile via CSS) */}
+        {/* Desktop top navbar — hidden on mobile (hidden lg:flex inside component) */}
         <Navbar />
 
-        {/* Scrollable content */}
-        <main style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        {/* .app-main = flex:1; overflow-y:auto */}
+        <main className="app-main">
           <div className="p-4 md:p-6 pb-24 lg:pb-8 max-w-7xl mx-auto">
             <AnimatePresence mode="wait">
               <motion.div
@@ -78,15 +68,16 @@ export default function Home() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.25, ease: 'easeOut' }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
               >
-                {renderActiveView()}
+                {renderView()}
               </motion.div>
             </AnimatePresence>
           </div>
         </main>
       </div>
 
+      {/* AI Assistant slide-out panel */}
       <DesignAssistant
         isOpen={isAssistantOpen}
         onClose={() => setIsAssistantOpen(false)}
