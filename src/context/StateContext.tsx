@@ -5,7 +5,7 @@ import {
   Student, Teacher, Guard, Admin, GetPass, AttendanceRecord, 
   ActivityLog, SchoolSettings, DesignConfig, User, UserRole, AttendanceStatus
 } from './types';
-import { fsListen, fsSet, fsUpdate, fsDelete, fsAdd } from '@/lib/firebaseDB';
+import { fsListen, fsSet, fsUpdate, fsDelete, fsAdd, fsGetAll } from '@/lib/firebaseDB';
 
 interface StateContextType {
   currentUser: User | null;
@@ -645,8 +645,37 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     root.style.setProperty('--font-poppins', designConfig.fontFamily);
   }, [designConfig]);
 
-  // ─── Firestore real-time sync ────────────────────────────────────────
+  // ─── Firestore real-time sync & auto-seeding ────────────────────────
   useEffect(() => {
+    const seedIfNeeded = async () => {
+      try {
+        // Seed Students
+        const studentSnap = await fsGetAll('students');
+        if (studentSnap.length === 0) {
+          for (const s of students) {
+            await fsSet('students', s.id, s as unknown as Record<string, unknown>);
+          }
+        }
+        // Seed Teachers
+        const teacherSnap = await fsGetAll('teachers');
+        if (teacherSnap.length === 0) {
+          for (const t of teachers) {
+            await fsSet('teachers', t.id, t as unknown as Record<string, unknown>);
+          }
+        }
+        // Seed Guards
+        const guardSnap = await fsGetAll('guards');
+        if (guardSnap.length === 0) {
+          for (const g of guards) {
+            await fsSet('guards', g.id, g as unknown as Record<string, unknown>);
+          }
+        }
+      } catch (e) {
+        console.error("Firestore seeding error:", e);
+      }
+    };
+    seedIfNeeded();
+
     // Listen to students collection
     const unsubStudents = fsListen('students', (data) => {
       if (data.length > 0) setStudents(data as unknown as Student[]);

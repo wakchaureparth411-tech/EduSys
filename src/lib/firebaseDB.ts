@@ -40,7 +40,7 @@ export const fsSet = async (col: string, id: string, data: Record<string, unknow
 
 export const fsUpdate = async (col: string, id: string, data: Record<string, unknown>) => {
   try {
-    await updateDoc(doc(db, col, id), { ...data, updatedAt: serverTimestamp() });
+    await setDoc(doc(db, col, id), { ...data, updatedAt: serverTimestamp() }, { merge: true });
     return { success: true };
   } catch (e: unknown) {
     return { success: false, error: String(e) };
@@ -62,7 +62,7 @@ export const fsListen = (
   col: string,
   callback: (data: Record<string, unknown>[]) => void
 ) => {
-  const q = query(collection(db, col), orderBy('createdAt', 'desc'));
+  const q = query(collection(db, col));
   return onSnapshot(q, (snap) => {
     const items = snap.docs.map(d => {
       const data = d.data();

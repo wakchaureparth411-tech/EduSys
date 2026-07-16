@@ -178,14 +178,17 @@ export const InformationView: React.FC = () => {
               </div>
 
               {/* Edit toggle */}
-              {!isEditing && (currentUser?.role === 'Super Admin' || currentUser?.role === 'Admin' || currentUser?.role === 'Manager') ? (
+              {!isEditing && (currentUser?.role === 'Super Admin' || currentUser?.role === 'Admin' || currentUser?.role === 'Manager') && (
                 <button
                   onClick={() => setIsEditing(true)}
                   className="w-full mt-6 py-2.5 bg-brand-primary text-white text-xs font-bold rounded-xl shadow-lg shadow-brand-primary/10 hover:shadow-brand-primary/20 flex items-center justify-center gap-1.5"
                 >
                   <Edit2 className="w-3.5 h-3.5" /> Edit Profile Info
                 </button>
-              ) : (
+              )}
+
+              {/* Contact manager banner shown only to non-authorized roles */}
+              {currentUser?.role !== 'Super Admin' && currentUser?.role !== 'Admin' && currentUser?.role !== 'Manager' && (
                 <div className="mt-5 p-3 rounded-xl bg-violet-500/10 border border-violet-500/20 text-[11px] text-violet-700 dark:text-violet-300 font-semibold leading-relaxed">
                   📢 Kahi badal (changes) karayche astil tar direct Manager <strong>Mayur Gambhire</strong> (Mayur2505@gmail.com) yanchyakade samparka sadha.
                 </div>
