@@ -688,24 +688,27 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     const seedIfNeeded = async () => {
       try {
-        // Seed Students
+        // Seed Students individually if missing
         const studentSnap = await fsGetAll('students');
-        if (studentSnap.length === 0) {
-          for (const s of students) {
+        for (const s of students) {
+          const exists = studentSnap.some(doc => doc.id === s.id);
+          if (!exists) {
             await fsSet('students', s.id, s as unknown as Record<string, unknown>);
           }
         }
-        // Seed Teachers
+        // Seed Teachers individually if missing
         const teacherSnap = await fsGetAll('teachers');
-        if (teacherSnap.length === 0) {
-          for (const t of teachers) {
+        for (const t of teachers) {
+          const exists = teacherSnap.some(doc => doc.id === t.id);
+          if (!exists) {
             await fsSet('teachers', t.id, t as unknown as Record<string, unknown>);
           }
         }
-        // Seed Guards
+        // Seed Guards individually if missing
         const guardSnap = await fsGetAll('guards');
-        if (guardSnap.length === 0) {
-          for (const g of guards) {
+        for (const g of guards) {
+          const exists = guardSnap.some(doc => doc.id === g.id);
+          if (!exists) {
             await fsSet('guards', g.id, g as unknown as Record<string, unknown>);
           }
         }
