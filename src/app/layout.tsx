@@ -13,7 +13,11 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "EduSys – Smart Campus Management",
   description: "Premium school & college management: attendance, gate pass, fees, results and more.",
-  viewport: "width=device-width, initial-scale=1",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
