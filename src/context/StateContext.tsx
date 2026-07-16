@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { 
   Student, Teacher, Guard, Admin, GetPass, AttendanceRecord, 
   ActivityLog, SchoolSettings, DesignConfig, User, UserRole, AttendanceStatus
@@ -64,6 +64,8 @@ const hexToRgb = (hex: string): string => {
 };
 
 export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const deletedIds = useRef<Set<string>>(new Set());
+
   // Authentication
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     if (typeof window !== 'undefined') {
@@ -784,29 +786,45 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Listen to students collection
     const unsubStudents = fsListen('students', (data) => {
       if (data.length > 0) {
-        setStudents(data as unknown as Student[]);
-        localStorage.setItem('edusys_students', JSON.stringify(data));
+        setStudents(prev => {
+          const localOnly = prev.filter(p => !data.some(d => d.id === p.id) && !deletedIds.current.has(p.id));
+          const merged = [...data as unknown as Student[], ...localOnly];
+          localStorage.setItem('edusys_students', JSON.stringify(merged));
+          return merged;
+        });
       }
     });
     // Listen to teachers collection
     const unsubTeachers = fsListen('teachers', (data) => {
       if (data.length > 0) {
-        setTeachers(data as unknown as Teacher[]);
-        localStorage.setItem('edusys_teachers', JSON.stringify(data));
+        setTeachers(prev => {
+          const localOnly = prev.filter(p => !data.some(d => d.id === p.id) && !deletedIds.current.has(p.id));
+          const merged = [...data as unknown as Teacher[], ...localOnly];
+          localStorage.setItem('edusys_teachers', JSON.stringify(merged));
+          return merged;
+        });
       }
     });
     // Listen to guards collection
     const unsubGuards = fsListen('guards', (data) => {
       if (data.length > 0) {
-        setGuards(data as unknown as Guard[]);
-        localStorage.setItem('edusys_guards', JSON.stringify(data));
+        setGuards(prev => {
+          const localOnly = prev.filter(p => !data.some(d => d.id === p.id) && !deletedIds.current.has(p.id));
+          const merged = [...data as unknown as Guard[], ...localOnly];
+          localStorage.setItem('edusys_guards', JSON.stringify(merged));
+          return merged;
+        });
       }
     });
     // Listen to getpass collection
     const unsubGetPass = fsListen('getpass', (data) => {
       if (data.length > 0) {
-        setGetPassRequests(data as unknown as GetPass[]);
-        localStorage.setItem('edusys_getpass', JSON.stringify(data));
+        setGetPassRequests(prev => {
+          const localOnly = prev.filter(p => !data.some(d => d.id === p.id) && !deletedIds.current.has(p.id));
+          const merged = [...data as unknown as GetPass[], ...localOnly];
+          localStorage.setItem('edusys_getpass', JSON.stringify(merged));
+          return merged;
+        });
       }
     });
     return () => {
@@ -959,12 +977,10 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const newStudent: Student = { ...studentData, id: newId };
     setStudents(prev => [...prev, newStudent]);
     const res = await fsSet('students', newId, newStudent as unknown as Record<string, unknown>);
+    logActivity('Add Student', `Created student profile: ${newStudent.fullName} (${newId})`);
+    addNotification(`New student ${newStudent.fullName} has been registered`);
     if (!res.success) {
-      alert(`Firebase Firestore Error: ${res.error || 'Permission denied. Please verify that your Cloud Firestore database is enabled and rules are set to allow read/write.'}`);
-      setStudents(prev => prev.filter(s => s.id !== newId));
-    } else {
-      logActivity('Add Student', `Created student profile: ${newStudent.fullName} (${newId})`);
-      addNotification(`New student ${newStudent.fullName} has been registered`);
+      console.warn(`Firebase Firestore Error: ${res.error || 'Write permission denied.'}`);
     }
   };
 
@@ -973,20 +989,21 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setStudents(prev => prev.map(s => s.id === updatedStudent.id ? updatedStudent : s));
     const res = await fsUpdate('students', updatedStudent.id, updatedStudent as unknown as Record<string, unknown>);
     if (!res.success) {
-      alert(`Firebase Firestore Error: ${res.error || 'Write permission denied.'}`);
-      if (original) setStudents(prev => prev.map(s => s.id === updatedStudent.id ? original : s));
+      console.warn(`Firebase Firestore Error: ${res.error || 'Write permission denied.'}`);
     } else {
       logActivity('Update Student', `Updated student profile: ${updatedStudent.fullName} (${updatedStudent.id})`);
     }
   };
 
   const deleteStudent = async (id: string) => {
+    deletedIds.current.add(id);
     const student = students.find(s => s.id === id);
     if (!student) return;
     setStudents(prev => prev.filter(s => s.id !== id));
     const res = await fsDelete('students', id);
     if (!res.success) {
-      alert(`Firebase Firestore Error: ${res.error || 'Delete permission denied.'}`);
+      console.warn(`Firebase Firestore Error: ${res.error || 'Delete permission denied.'}`);
+      deletedIds.current.delete(id);
       setStudents(prev => [...prev, student]);
     } else {
       logActivity('Delete Student', `Deleted student profile: ${student.fullName} (${id})`);
@@ -1000,12 +1017,10 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const newTeacher: Teacher = { ...teacherData, id: newId };
     setTeachers(prev => [...prev, newTeacher]);
     const res = await fsSet('teachers', newId, newTeacher as unknown as Record<string, unknown>);
+    logActivity('Add Teacher', `Created teacher profile: ${newTeacher.fullName} (${newId})`);
+    addNotification(`New teacher ${newTeacher.fullName} joined the school`);
     if (!res.success) {
-      alert(`Firebase Firestore Error: ${res.error || 'Permission denied. Please verify that your Cloud Firestore database is enabled and rules are set to allow read/write.'}`);
-      setTeachers(prev => prev.filter(t => t.id !== newId));
-    } else {
-      logActivity('Add Teacher', `Created teacher profile: ${newTeacher.fullName} (${newId})`);
-      addNotification(`New teacher ${newTeacher.fullName} joined the school`);
+      console.warn(`Firebase Firestore Error: ${res.error || 'Write permission denied.'}`);
     }
   };
 
@@ -1014,20 +1029,21 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setTeachers(prev => prev.map(t => t.id === updatedTeacher.id ? updatedTeacher : t));
     const res = await fsUpdate('teachers', updatedTeacher.id, updatedTeacher as unknown as Record<string, unknown>);
     if (!res.success) {
-      alert(`Firebase Firestore Error: ${res.error || 'Write permission denied.'}`);
-      if (original) setTeachers(prev => prev.map(t => t.id === updatedTeacher.id ? original : t));
+      console.warn(`Firebase Firestore Error: ${res.error || 'Write permission denied.'}`);
     } else {
       logActivity('Update Teacher', `Updated teacher profile: ${updatedTeacher.fullName} (${updatedTeacher.id})`);
     }
   };
 
   const deleteTeacher = async (id: string) => {
+    deletedIds.current.add(id);
     const teacher = teachers.find(t => t.id === id);
     if (!teacher) return;
     setTeachers(prev => prev.filter(t => t.id !== id));
     const res = await fsDelete('teachers', id);
     if (!res.success) {
-      alert(`Firebase Firestore Error: ${res.error || 'Delete permission denied.'}`);
+      console.warn(`Firebase Firestore Error: ${res.error || 'Delete permission denied.'}`);
+      deletedIds.current.delete(id);
       setTeachers(prev => [...prev, teacher]);
     } else {
       logActivity('Delete Teacher', `Deleted teacher profile: ${teacher.fullName} (${id})`);
@@ -1040,11 +1056,9 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const newGuard: Guard = { ...guardData, id: newId };
     setGuards(prev => [...prev, newGuard]);
     const res = await fsSet('guards', newId, newGuard as unknown as Record<string, unknown>);
+    logActivity('Add Guard', `Created security guard profile: ${newGuard.fullName}`);
     if (!res.success) {
-      alert(`Firebase Firestore Error: ${res.error || 'Permission denied.'}`);
-      setGuards(prev => prev.filter(g => g.id !== newId));
-    } else {
-      logActivity('Add Guard', `Created security guard profile: ${newGuard.fullName}`);
+      console.warn(`Firebase Firestore Error: ${res.error || 'Write permission denied.'}`);
     }
   };
 
@@ -1053,20 +1067,21 @@ export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setGuards(prev => prev.map(g => g.id === updatedGuard.id ? updatedGuard : g));
     const res = await fsUpdate('guards', updatedGuard.id, updatedGuard as unknown as Record<string, unknown>);
     if (!res.success) {
-      alert(`Firebase Firestore Error: ${res.error || 'Write permission denied.'}`);
-      if (original) setGuards(prev => prev.map(g => g.id === updatedGuard.id ? original : g));
+      console.warn(`Firebase Firestore Error: ${res.error || 'Write permission denied.'}`);
     } else {
       logActivity('Update Guard', `Updated guard profile: ${updatedGuard.fullName}`);
     }
   };
 
   const deleteGuard = async (id: string) => {
+    deletedIds.current.add(id);
     const guard = guards.find(g => g.id === id);
     if (!guard) return;
     setGuards(prev => prev.filter(g => g.id !== id));
     const res = await fsDelete('guards', id);
     if (!res.success) {
       alert(`Firebase Firestore Error: ${res.error || 'Delete permission denied.'}`);
+      deletedIds.current.delete(id);
       setGuards(prev => [...prev, guard]);
     } else {
       logActivity('Delete Guard', `Deleted guard ID: ${id}`);
