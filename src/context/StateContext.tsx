@@ -65,8 +65,47 @@ const hexToRgb = (hex: string): string => {
 
 export const StateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Authentication
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [activeTab, setActiveTab] = useState<string>('login');
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('edusys_current_user');
+        return saved ? JSON.parse(saved) : null;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedTab = localStorage.getItem('edusys_active_tab');
+        const savedUser = localStorage.getItem('edusys_current_user');
+        return savedUser ? (savedTab || 'dashboard') : 'login';
+      } catch {
+        return 'login';
+      }
+    }
+    return 'login';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (currentUser) {
+        localStorage.setItem('edusys_current_user', JSON.stringify(currentUser));
+      } else {
+        localStorage.removeItem('edusys_current_user');
+        localStorage.removeItem('edusys_active_tab');
+      }
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && currentUser) {
+      localStorage.setItem('edusys_active_tab', activeTab);
+    }
+  }, [activeTab, currentUser]);
 
   // Notifications
   const [notifications, setNotifications] = useState([
