@@ -2,8 +2,7 @@
 
 import React, { useState } from 'react';
 import { useAppState } from '@/context/StateContext';
-import { Sidebar } from '@/components/layout/Sidebar';
-import { MobileTopBar } from '@/components/layout/Sidebar';
+import { Sidebar, MobileTopBar } from '@/components/layout/Sidebar';
 import { Navbar } from '@/components/layout/Navbar';
 import { DesignAssistant } from '@/components/design-assistant/DesignAssistant';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -43,26 +42,36 @@ export default function Home() {
   if (!currentUser) return <AuthView />;
 
   return (
-    // Outer: horizontal flex, full viewport
-    <div className="flex w-full min-h-screen bg-[#f8fafc] dark:bg-[#090d16] font-sans">
-
-      {/* Desktop sidebar — hidden on mobile */}
+    <div
+      style={{
+        display: 'flex',
+        width: '100%',
+        minHeight: '100vh',
+        backgroundColor: 'var(--background, #f8fafc)',
+      }}
+    >
+      {/* Desktop sidebar — CSS hides it on mobile */}
       <Sidebar onToggleAssistant={() => setIsAssistantOpen(true)} />
 
-      {/* Right column: header + scrollable content */}
+      {/* Right column — takes all remaining width */}
       <div
-        className="flex flex-col flex-1 min-w-0"
-        style={{ minHeight: '100vh' }}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1,
+          minWidth: 0,
+          minHeight: '100vh',
+        }}
       >
-        {/* Mobile top bar (mobile only, flex-shrink-0) */}
+        {/* Mobile top bar (only visible on mobile, flex-shrink:0) */}
         <MobileTopBar onToggleAssistant={() => setIsAssistantOpen(true)} />
 
-        {/* Desktop navbar (hidden on mobile) */}
+        {/* Desktop top Navbar (hidden on mobile via CSS) */}
         <Navbar />
 
-        {/* Main scrollable content */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="p-4 md:p-6 pb-28 lg:pb-8">
+        {/* Scrollable content */}
+        <main style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <div className="p-4 md:p-6 pb-24 lg:pb-8 max-w-7xl mx-auto">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
