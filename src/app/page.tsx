@@ -43,23 +43,26 @@ export default function Home() {
   if (!currentUser) return <AuthView />;
 
   return (
-    <div className="flex h-[100dvh] w-screen overflow-hidden bg-[#f8fafc] dark:bg-[#090d16] font-sans">
+    // Outer: horizontal flex, full viewport
+    <div className="flex w-full min-h-screen bg-[#f8fafc] dark:bg-[#090d16] font-sans">
 
       {/* Desktop sidebar — hidden on mobile */}
       <Sidebar onToggleAssistant={() => setIsAssistantOpen(true)} />
 
-      {/* Right column */}
-      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-
-        {/* Mobile top bar — shown only on mobile, placed ABOVE content */}
+      {/* Right column: header + scrollable content */}
+      <div
+        className="flex flex-col flex-1 min-w-0"
+        style={{ minHeight: '100vh' }}
+      >
+        {/* Mobile top bar (mobile only, flex-shrink-0) */}
         <MobileTopBar onToggleAssistant={() => setIsAssistantOpen(true)} />
 
-        {/* Desktop navbar — hidden on mobile */}
+        {/* Desktop navbar (hidden on mobile) */}
         <Navbar />
 
-        {/* Scrollable content area */}
-        <main className="flex-1 overflow-y-auto overscroll-contain">
-          <div className="p-4 md:p-6 pb-28 lg:pb-8 max-w-7xl mx-auto">
+        {/* Main scrollable content */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="p-4 md:p-6 pb-28 lg:pb-8">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
@@ -75,7 +78,10 @@ export default function Home() {
         </main>
       </div>
 
-      <DesignAssistant isOpen={isAssistantOpen} onClose={() => setIsAssistantOpen(false)} />
+      <DesignAssistant
+        isOpen={isAssistantOpen}
+        onClose={() => setIsAssistantOpen(false)}
+      />
     </div>
   );
 }
